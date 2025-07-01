@@ -37,7 +37,6 @@ class ZoomerStrategy(CategoryStrategy, BaseScraper):
             brand: f'{self.smartphones_page_url}/brand={brand.lower()};-c855'
             for brand in brands
         }
-        print(links)
         return links
 
 
@@ -55,11 +54,33 @@ class AltaStrategy(CategoryStrategy, BaseScraper):
 
         soup = self.ss.scrape(self.smartphones_page_url, click_brands_dropdown)
         brand_container = soup.select_one('ul.sc-d7590353-11')
+        if not brand_container:
+            raise ValueError("Brand container not found")
         brands = [b.get_text(strip=True) for b in brand_container.find_all('p')
                   if b.get_text(strip=True)]
         links = {
             brand: f'{self.smartphones_page_url.replace('-c16s', '')}/brendi={brand.lower()};-c16s'
             for brand in brands
         }
-        print(links)
+        return links
+
+
+class UnicomStrategy(CategoryStrategy, BaseScraper):
+    def __init__(self):
+        super().__init__('https://unicom.ge/', 'Unicom')
+        self.ss = SeleniumScraper.get_instance()
+        self.smartphones_page_url = self.validate_url(self,'/categories/7')
+
+    def get_brand_links(self):
+        soup = self.fetch_and_parse_page(self.smartphones_page_url)
+        brand_container = soup.select_one('form#filterform > :nth-child(6) > div#collapseExample')
+        if not brand_container:
+            raise ValueError("Brand container not found")
+
+        brands = [b.get_text(strip=True) for b in brand_container.select('div.form-check > label')
+                  if b.get_text(strip=True)]
+        links = {
+            brand: f'{self.smartphones_page_url}?filter=1&minprice=0&maxprice=4999&mfilter%5B%5D=1_{brand}'
+            for brand in brands
+        }
         return links

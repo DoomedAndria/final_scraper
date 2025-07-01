@@ -1,5 +1,5 @@
-from src.scrapers.static_scraper import ZoomerStrategy, AltaStrategy
+from src.scrapers.static_scraper import ZoomerStrategy, AltaStrategy, UnicomStrategy
 
-a = AltaStrategy()
-a.get_brand_links()
+a = UnicomStrategy()
+print(a.get_brand_links())
 
